@@ -1,7 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "theme-ui"
 // eslint-disable-next-line no-unused-vars
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+
 import { graphql } from "gatsby"
 
 import { AnimatePresence } from "framer-motion"
@@ -9,16 +10,20 @@ import { AnimatePresence } from "framer-motion"
 import Layout from "../components/layout"
 import Post from "../components/post"
 
-export default ({ data }) => {
+export default ({ data, pageContext }) => {
   const { categories, allPosts } = data.craft
+
+  useEffect(() => {
+    if (pageContext.slug) {
+      filterPosts(pageContext.slug)
+    }
+  }, [])
 
   const [posts, setPosts] = useState(allPosts)
   const [selected, setSelected] = useState("all")
 
-  const filterPosts = event => {
-    const value = event.target.value
+  const filterPosts = value => {
     let posts = allPosts
-
     if (value !== "all") {
       posts = allPosts.filter(post =>
         post.newsCategory.find(category => category.slug === value)
@@ -32,7 +37,7 @@ export default ({ data }) => {
   return (
     <Layout>
       <h2>Filter by category -</h2>
-      <select onChange={filterPosts} value={selected}>
+      <select onChange={e => filterPosts(e.target.value)} value={selected}>
         <option value="all">All</option>
         {categories.map(category => (
           <option key={category.id} value={category.slug}>
